@@ -6,9 +6,15 @@ function required(name: string, value: string | undefined): string {
   return value;
 }
 
+// Read lazily (getters) so a build without these variables still succeeds;
+// the error appears at request time instead.
 export const publicEnv = {
-  supabaseUrl: required("NEXT_PUBLIC_SUPABASE_URL", process.env.NEXT_PUBLIC_SUPABASE_URL),
-  supabaseAnonKey: required("NEXT_PUBLIC_SUPABASE_ANON_KEY", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
+  get supabaseUrl() {
+    return required("NEXT_PUBLIC_SUPABASE_URL", process.env.NEXT_PUBLIC_SUPABASE_URL);
+  },
+  get supabaseAnonKey() {
+    return required("NEXT_PUBLIC_SUPABASE_ANON_KEY", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+  },
 };
 
 export function appUrl(): string {
