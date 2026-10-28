@@ -1,0 +1,211 @@
+@import "tailwindcss";
+
+/*
+  eqlStats design tokens
+  Light UI the colour of poured concrete; the one bold element is the
+  instrument panel: a dark plate of status lamps on every project.
+*/
+:root {
+  --bg: #eceef0;
+  --surface: #ffffff;
+  --sunk: #e3e6ea;
+  --ink: #121a26;
+  --ink-2: #485364;
+  --ink-3: #7a8494;
+  --line: #d4d9df;
+  --line-strong: #b9c0c9;
+
+  --plate: #141c28;
+  --plate-2: #1d2736;
+  --plate-ink: #e6ebf2;
+  --plate-ink-2: #8d99ab;
+
+  --ok: #158a5a;
+  --warn: #c6870a;
+  --down: #cf3a33;
+  --idle: #a2abb7;
+
+  --focus: #2f6fe0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0e131a;
+    --surface: #151b24;
+    --sunk: #1b2330;
+    --ink: #e6ebf2;
+    --ink-2: #a9b3c1;
+    --ink-3: #7c8798;
+    --line: #26303e;
+    --line-strong: #344052;
+    --plate: #080c11;
+    --plate-2: #111823;
+    --ok: #2bb27a;
+    --warn: #e2a42a;
+    --down: #ef5b52;
+    --idle: #5d6878;
+    --focus: #6a9cff;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-sunk: var(--sunk);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-plate: var(--plate);
+  --color-plate-2: var(--plate-2);
+  --color-plate-ink: var(--plate-ink);
+  --color-plate-ink-2: var(--plate-ink-2);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-down: var(--down);
+  --color-idle: var(--idle);
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+}
+
+html {
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background: var(--bg);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--focus) 25%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+/* Status lamps ---------------------------------------------------------- */
+.lamp {
+  --c: var(--idle);
+  display: inline-block;
+  flex: none;
+  width: var(--size, 10px);
+  height: var(--size, 10px);
+  border-radius: 999px;
+  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, white 45%, var(--c)) 0 18%, var(--c) 60%);
+  box-shadow: 0 0 0 1px color-mix(in srgb, black 25%, var(--c)) inset;
+}
+.lamp[data-status="ok"] { --c: var(--ok); }
+.lamp[data-status="warn"] { --c: var(--warn); }
+.lamp[data-status="down"] { --c: var(--down); }
+
+/* On the dark plate, lit lamps glow */
+.plate .lamp[data-status="ok"],
+.plate .lamp[data-status="warn"],
+.plate .lamp[data-status="down"] {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, black 30%, var(--c)) inset,
+    0 0 10px 1px color-mix(in srgb, var(--c) 55%, transparent);
+}
+
+/* The one orchestrated moment: lamps power on left to right when a panel loads */
+@media (prefers-reduced-motion: no-preference) {
+  .plate .lamp {
+    animation: power-on 520ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: calc(var(--i, 0) * 90ms + 120ms);
+  }
+  @keyframes power-on {
+    0% { opacity: 0.15; filter: saturate(0); }
+    60% { opacity: 1; filter: saturate(1.4) brightness(1.3); }
+    100% { opacity: 1; filter: none; }
+  }
+}
+
+/* The plate: brushed dark metal with screw-head corners */
+.plate {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, white 4%, transparent), transparent 40%),
+    var(--plate);
+  color: var(--plate-ink);
+  border-radius: 14px;
+  box-shadow:
+    0 1px 0 color-mix(in srgb, white 8%, transparent) inset,
+    0 18px 40px -24px rgb(10 16 26 / 0.55);
+  position: relative;
+}
+.plate::before,
+.plate::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--plate-2);
+  box-shadow: 0 0 0 1px color-mix(in srgb, white 7%, transparent) inset;
+}
+.plate::before { left: 10px; }
+.plate::after { right: 10px; }
+
+/* Toggle switch built on a real checkbox */
+.switch {
+  appearance: none;
+  flex: none;
+  width: 36px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--sunk);
+  box-shadow: 0 0 0 1px var(--line-strong) inset;
+  position: relative;
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
+  transition: transform 160ms ease;
+}
+.switch:checked {
+  background: var(--ok);
+  box-shadow: none;
+}
+.switch:checked::after {
+  transform: translateX(16px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .switch, .switch::after { transition: none; }
+}
+
+details > summary {
+  list-style: none;
+  cursor: pointer;
+}
+details > summary::-webkit-details-marker {
+  display: none;
+}
