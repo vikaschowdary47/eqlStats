@@ -1,9 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { SmartCapture } from "./smart-capture";
+import type { CaptureItem } from "@/lib/capture";
+import { storeCaptureFiles, downloadCaptureFile } from "@/lib/capture-files";
 import * as Dialog from "@radix-ui/react-dialog";
 import { AnimatePresence, motion, MotionConfig } from "motion/react";
 import {
+  ArrowDownUp,
   ArrowLeft,
   ArrowRight,
   ArrowUpRight,
@@ -19,6 +23,7 @@ import {
   Plus,
   Search,
   Settings2,
+  Sparkles,
   X,
 } from "lucide-react";
 import {
@@ -36,6 +41,10 @@ type Entry = {
   url: string;
   pinned: boolean;
   createdAt: string;
+  fileId?: string;
+  fileName?: string;
+  fileSize?: number;
+  fileLastModified?: number;
 };
 type State = {
   projects: StudioProject[];
@@ -309,6 +318,7 @@ export function FrontendStudio() {
     }
     const id = editor.entry?.id || crypto.randomUUID();
     const entry: Entry = {
+      ...editor.entry,
       id,
       kind: editor.kind,
       projectId: String(fd.get("projectId") || project?.id || ""),
@@ -331,6 +341,71 @@ export function FrontendStudio() {
     }));
     setEditor(null);
     setMessage("Saved in this browser.");
+  };
+  const saveCapture = async (items: CaptureItem[]) => {
+    if (!ready)
+      throw new Error("Workspace is loading. Try saving again in a moment.");
+    const now = new Date().toISOString();
+    const additions: Entry[] = [];
+    const binaries: { id: string; file: File }[] = [];
+    let duplicates = 0;
+    for (const item of items) {
+      if (!state.projects.some((p) => p.id === item.projectId))
+        throw new Error("Choose an existing project for each item.");
+      const duplicate = [...state.entries, ...additions].some(
+        (e) =>
+          e.projectId === item.projectId &&
+          (item.file
+            ? e.fileName === item.file.name &&
+              e.fileSize === item.file.size &&
+              e.fileLastModified === item.file.lastModified
+            : item.url
+              ? e.url === item.url
+              : e.body === item.body && e.kind === item.kind),
+      );
+      if (duplicate) {
+        duplicates++;
+        continue;
+      }
+      const id = crypto.randomUUID();
+      additions.push({
+        id,
+        projectId: item.projectId,
+        kind: item.kind,
+        title: item.title.trim(),
+        body: item.body,
+        url: item.url,
+        pinned: false,
+        createdAt: now,
+        ...(item.file
+          ? {
+              fileId: id,
+              fileName: item.file.name,
+              fileSize: item.file.size,
+              fileLastModified: item.file.lastModified,
+            }
+          : {}),
+      });
+      if (item.file) binaries.push({ id, file: item.file });
+    }
+    await storeCaptureFiles(binaries);
+    const touched = new Set(additions.map((e) => e.projectId));
+    const next = {
+      ...state,
+      entries: [...additions, ...state.entries],
+      projects: state.projects.map((p) =>
+        touched.has(p.id) ? { ...p, updated_at: now } : p,
+      ),
+    };
+    try {
+      localStorage.setItem(key, JSON.stringify(next));
+    } catch {
+      throw new Error(
+        "Browser storage is full or unavailable. Your draft is still here. Try fewer items.",
+      );
+    }
+    setState(next);
+    return { saved: additions.length, duplicates };
   };
   const projects = state.projects.map((p) => ({
     ...p,
@@ -397,6 +472,24 @@ export function FrontendStudio() {
             </div>
             <h2>{e.title}</h2>
             <p>{e.body}</p>
+            {e.fileId && (
+              <button
+                className="capture-file-download"
+                onClick={async () => {
+                  try {
+                    await downloadCaptureFile(e.fileId!, e.fileName || e.title);
+                  } catch (error) {
+                    setMessage(
+                      error instanceof Error
+                        ? error.message
+                        : "Could not open the saved file.",
+                    );
+                  }
+                }}
+              >
+                Download {e.fileName || "file"} <ArrowDownUp size={14} />
+              </button>
+            )}
             {e.url && (
               <a href={e.url} target="_blank" rel="noreferrer">
                 Open reference <ArrowUpRight size={14} />
@@ -488,6 +581,18 @@ export function FrontendStudio() {
         }
         navigation={
           <>
+            <button
+              className="rail-capture"
+              onClick={() => {
+                const box = document.getElementById("project-capture");
+                box?.scrollIntoView({ block: "center" });
+                box?.focus();
+              }}
+            >
+              <Sparkles size={17} />
+              <span>Drop anything</span>
+              <Plus size={15} />
+            </button>
             {nav.map((n) => (
               <button
                 key={n.id}
@@ -512,6 +617,11 @@ export function FrontendStudio() {
           </span>
           <span>Database & APIs later</span>
         </div>
+        <SmartCapture
+          projects={state.projects}
+          currentProjectId={view === "project" ? project?.id : undefined}
+          onSave={saveCapture}
+        />
         <AnimatePresence mode="wait">
           <motion.div
             key={view}

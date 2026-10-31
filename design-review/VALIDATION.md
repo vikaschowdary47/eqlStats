@@ -31,3 +31,14 @@ Branch: rebuild/project-workspace-v2. Production build served locally on port 44
 - Screenshots contain illustrative sample data and local test records.
 
 Final finishing pass: mobile Explore studio menu exposes all eight destinations and closes after selection; no phone overflow observed. Singular service/item counts corrected. Final production build and typecheck passed after these changes. Independent screenshot review: design 8.4, usability 7.8, creativity 8.0, content 8.1 before the final menu/count fixes; no blocking visual defects identified. No post-fix numerical score is claimed.
+
+## Drop anything capture pass
+- Added 12 passing parser regression tests: mixed console/reference/note input, project matching, markdown URL punctuation, duplicate collapse, decisions, unknown references, protocol-less domains, malformed escapes, file URLs, empty input, unsafe schemes, email/filename false positives, and ambiguous projects.
+- Production build and TypeScript passed.
+- Browser: mixed GitHub/Vercel/decision input produced correct editable review; missing project blocked saving; assigning it enabled a successful three-item save.
+- Repeating an existing project URL returned zero new items and one duplicate.
+- Bulk project selection applied to every review item.
+- Project-local capture defaulted to the open project; Escape preserved the unsaved draft.
+- Navigation shortcut focused the textbox. Desktop and mobile review had no document horizontal overflow. No captured console warnings/errors.
+- File attachment browser test was blocked because the browser upload permission was declined. It was not retried or bypassed. Actual file upload, IndexedDB persistence and download were therefore not verified in the browser. File support is implemented; this verification limitation remains explicit.
+- Local parser only: no AI extraction of arbitrary documents, remote page metadata, API calls, schema changes or live data writes.

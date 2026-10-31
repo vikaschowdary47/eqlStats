@@ -93,3 +93,11 @@ npm run start -- -p 4400
 This frontend includes projects in gallery/atlas views, project workspaces, notes, service/account references, artifacts, decisions, sample GitHub discovery/import, connection preferences, and studio settings. Create/edit/pin actions persist in this browser using localStorage. Sample content is included. Connections remain disconnected; no GitHub, MCP, or Supabase calls are made by this frontend workspace. EQL Share integration is deferred.
 
 The existing authenticated application remains at `/dashboard` and uses the existing Supabase configuration and RLS. Its project gallery shares the redesigned visual component. No migrations are required for this change. See `DESIGN.md` for the design system and `design-review/VALIDATION.md` for checks and limitations.
+
+### Drop anything inbox
+
+The frontend studio has a prominent capture box on every screen and a navigation shortcut. Paste a mix of URLs and text, attach files, or drop files onto the box. Organize opens an editable review with suggested projects and types. Known console links become service references; GitHub/design/document links become artifacts; notes and explicit decisions remain text. You can assign the entire batch to one project. Existing URLs in the same project are skipped.
+
+This is local rule-based recognition, without AI calls or remote metadata fetching. Supported text files up to 1 MB get a text preview and link extraction from the first 20,000 characters. Other files are retained as attachments, without interpreting their contents. Original files live in IndexedDB on this device, with download controls on saved items; clearing browser site data removes this local working copy. Limits: 10 files, 20 MB each, 50 MB total per capture. Database/cloud storage and AI enrichment remain future work.
+
+Run parser regression tests with `npm run test:capture`.
