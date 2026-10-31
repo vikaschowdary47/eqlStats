@@ -79,3 +79,17 @@ src/app/api/cron/checks/            scheduled checks
 - More integrations: Stripe revenue, GitHub Actions, Sentry, App Store Connect
 - Browser extension / desktop widget for one-click capture
 - Status-change alerts by email
+
+## Project studio frontend
+
+The redesign is available without database credentials at `http://localhost:4400/studio-preview`:
+
+```sh
+npm ci
+npm run build
+npm run start -- -p 4400
+```
+
+This frontend includes projects in gallery/atlas views, project workspaces, notes, service/account references, artifacts, decisions, sample GitHub discovery/import, connection preferences, and studio settings. Create/edit/pin actions persist in this browser using localStorage. Sample content is included. Connections remain disconnected; no GitHub, MCP, or Supabase calls are made by this frontend workspace. EQL Share integration is deferred.
+
+The existing authenticated application remains at `/dashboard` and uses the existing Supabase configuration and RLS. Its project gallery shares the redesigned visual component. No migrations are required for this change. See `DESIGN.md` for the design system and `design-review/VALIDATION.md` for checks and limitations.
