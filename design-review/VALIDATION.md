@@ -29,3 +29,5 @@ Branch: rebuild/project-workspace-v2. Production build served locally on port 44
 - Reduced motion is implemented with MotionConfig and CSS media queries; an OS-level reduced-motion session was not exercised.
 - This is manual functional/responsive/keyboard verification, not a full axe audit or measured LCP/CLS/FPS benchmark.
 - Screenshots contain illustrative sample data and local test records.
+
+Final finishing pass: mobile Explore studio menu exposes all eight destinations and closes after selection; no phone overflow observed. Singular service/item counts corrected. Final production build and typecheck passed after these changes. Independent screenshot review: design 8.4, usability 7.8, creativity 8.0, content 8.1 before the final menu/count fixes; no blocking visual defects identified. No post-fix numerical score is claimed.
